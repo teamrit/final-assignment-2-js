@@ -14,7 +14,8 @@ class App extends Component {
         selectedDay: undefined,
         isEmpty: true,
         isDisabled: false,
-        showForm: false
+        showForm: false,
+        showError: false
     }
   }
 
@@ -29,10 +30,10 @@ class App extends Component {
   addItem = e => {
     e.preventDefault();
     let {items,value,selectedDay} = this.state;
-    if (value.trim() !== "" && selectedDay!==undefined) {
-        this.setState({items: [{value,date:selectedDay},...items],value:'',selectedDay:undefined,showForm:false})
+    if ((value && value.trim() !== "") && selectedDay!==undefined) {
+        this.setState({items: [{value,date:selectedDay},...items],value:'',selectedDay:undefined,showForm:false,showError:false})
     } else {
-
+        this.setState({showError:true});
     }
   };
 
@@ -74,7 +75,7 @@ class App extends Component {
     };
 
   render() {
-    const {value,items,deleteIndex,selectedDay,showForm} = this.state;
+    const {value,items,deleteIndex,selectedDay,showForm,showError} = this.state;
     return (
       <div className="App-header" style={{
           background: `url(${logo})`,
@@ -86,9 +87,8 @@ class App extends Component {
                     <h2>
                         Todo List
                     </h2>
-                    <span>Add title and date before adding a to do.</span>
+                    <span className="text-warning">Add title and date before adding a to do.</span>
                 </div>
-
                 <div className="mt-3 mb-3 btn btn-info" onClick={this.toggleForm}>
                     Add Items
                 </div>
@@ -98,7 +98,11 @@ class App extends Component {
                         <div className="col-lg-12">
                             <form onSubmit={this.addItem} className="row">
                                 <div className="col-7">
-                                    <input className="form-control" value={value} onChange={this.changeInput} type="text"/>
+                                    <input className="form-control"
+                                           value={value}
+                                           onChange={this.changeInput}
+                                           placeholder="Enter your task here"
+                                           type="text"/>
                                 </div>
                                 <div className="col-4">
                                     <DayPickerInput
@@ -115,19 +119,23 @@ class App extends Component {
                         </div>
                     </div>
                     }
-
+                {showError &&
+                    <h6 className="container text-danger">
+                        Please enter to do title and date to add todo to the list
+                    </h6>
+                }
                 </div>
             </div>
 
             <div className="container mt-5">
                 {items.length === 0 && (
-                  <div className="hero">
-                      <p className="text-center">No items added yet</p>
+                  <div className="hero bg-secondary p-3 rounded">
+                      <p className="text-center text-white">No items added yet</p>
                   </div>
                 )}
                 {
                   items.length > 0 &&
-                  <table className="table table-warning rounded">
+                  <table className="table table-warning rounded" style={{opacity:0.90}}>
                       <thead>
                       <tr>
                           <th scope="col">Items</th>
@@ -139,7 +147,6 @@ class App extends Component {
                       {items.map((i,index) => (
                           <tr key={i+':'+index}>
                               <td style={{minWidth:'50%'}}>
-
                                   <input type="text" value={i.value} onChange={this.editItem(index)} className="form-control"/>
                               </td>
                               <td>
